@@ -29,7 +29,11 @@ flags:
     short: --clip
     default: false
     help: |
-      Attempts to use the latest entry in your local clipboard as content for your Gist. If using MacOS, an attempt to use pbpaste will be made. Otherwise, xsel will be used.
+      Attempts to use the latest entry in your local clipboard as content for your Gist. If using MacOS, an attempt to use pbpaste will be made. Otherwise, xclip will be used.
+  - long: --skip-short-url
+    default: false
+    help: |
+      Resulting Gist URLs are shortened by default using git.io. This flag will skip this entirely and provide the full URL.
   - long: --file
     short: -f
     arg: file
@@ -38,11 +42,13 @@ flags:
     short: -e
     arg: extension
     default: txt
-    help: The file extension of the Gist. If the path used in --file contains a file extension, baste will use that instead.
+    help: |
+      The file extension of the Gist. If using --file and --extension isn't specified, baste will attempt to infer the extension from the file name.
   - long: --token
     short: -t
     arg: token
-    help: Explicitly specific a personal developer token as an alternative to using the GITHUB_TOKEN environmental variable.
+    help: |
+      Explicitly specific a personal developer token as an alternative to using the GITHUB_TOKEN environmental variable.
 examples:
   - base --file /path/to/file.txt
   - baste --content '... code ...'

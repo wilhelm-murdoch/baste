@@ -9,33 +9,44 @@ root_command() {
   requires git
   requires jq
   
-  token="${GITHUB_TOKEN}"
-  if [[ ! "${GITHUB_TOKEN}" ]]; then
-    token="${args[token]}"
-  fi
+  [[ "${OSTYPE}" == "darwin"* ]] && requires pbpaste || requires xclip
   
-  if [[ ! "${token}" ]]; then
+  : ${GITHUB_TOKEN:=}
+  if [[ "${args[--token]}" ]]; then               # First, --token flag takes precedence.
+    token="${args[--token]}"
+  elif [[ "${GITHUB_TOKEN}" ]]; then              # Next, we try an environmental variable.
+    token="${GITHUB_TOKEN}"
+  elif git config github.token &> /dev/null; then # finally, we fall back to any possible git config.
     token=$(git config github.token)
+  else
+    err 'you must specifiy a valid token before posting; exiting ...'
   fi
   
-  if [[ ! "${token}" ]]; then
-    err 'you must specifiy a valid token by defining a GITHUB_TOKEN env, using the --token flag or setting it in your global git config.'
+  content="${args[--content]}"
+  if [[ "${args[--file]}" ]]; then
+    if ! test -f "${args[--file]}"; then
+      err "file ${args[--file]} does not exist; exiting ..."
+    fi
+    content=$(<"${args[--file]}")
+   elif [[ "${args[--clipboard]}" ]]; then
+    [[ "${OSTYPE}" == "darwin"* ]] && content=$(pbpaste) || content=$(xclip -o -selection clipboard)
   fi
   
-  CURL_OPTS=
-  # if [[ "${args[--public]}" ]]; then
-  #   CURL_OPTS+='--data-urlencode public=true '
-  # else
-  #   CURL_OPTS+='--data-urlencode public=false '
-  # fi
+  if read -t 0; then
+    read -r content
+  fi
+  
+  [[ ! "${content}" ]] && err 'you must provide some kind of content to post; exiting ...'
+  
+  [[ "${args[--public]}" ]] && public="true" || public="false"
   
   payload=$(
     jq -n \
-      --arg description "description" \
-      --arg name        "${args[--name]}"   \
-      --arg extension   "${args[--extension]}" \
-      --arg content     "derp"        \
-      --arg public      "true"       \
+      --arg     description "${args[--description]}" \
+      --arg     name        "${args[--name]}"        \
+      --arg     extension   "${args[--extension]}"   \
+      --arg     content     "${content}"             \
+      --argjson public      ${public}                \
       '{
         description: $description, 
         public: $public,
@@ -47,15 +58,22 @@ root_command() {
       }'
   )
   
-  curl -s -X POST https://api.github.com/gists \
+  response=$(
+    curl -s -X POST https://api.github.com/gists \
     -H "Accept: application/vnd.github.v3+json" \
     -H "Authorization: token ${token}" \
-    ${CURL_OPTS} \
-    -d "${payload}" | jq -r '.html_url'
+    -d "${payload}"
+  )
   
-  #   LOCATION=$(cat $RESPONSE_FILE|sed -ne '/Location/p'|cut -f2- -d:|tr -d ' ')
-  #   log "* Gist location:"
-  #   echo "$LOCATION"
+  url=$(echo "${response}" | jq -r '.html_url')
+  [[ "${url}" == 'null' ]] && err "$(echo "${response}" | jq -r '.message' | tr -d '\n\t')"
+  
+  if [[ "${args[--skip-short-url]}" ]]; then
+    echo "${url}"
+    exit 0
+  fi
+  
+  curl -is https://git.io -F "url=${url}" | awk -v FS=": " '/^Location/{print $2}'
 }
 
 # :command.version_command
@@ -112,7 +130,12 @@ baste_usage() {
     
     # :flag.usage
     echo "  --clipboard, --clip"
-    printf "    Attempts to use the latest entry in your local clipboard as content for your\n    Gist. If using MacOS, an attempt to use pbpaste will be made. Otherwise,\n    xsel will be used.\n"
+    printf "    Attempts to use the latest entry in your local clipboard as content for your\n    Gist. If using MacOS, an attempt to use pbpaste will be made. Otherwise,\n    xclip will be used.\n"
+    echo
+    
+    # :flag.usage
+    echo "  --skip-short-url"
+    printf "    Resulting Gist URLs are shortened by default using git.io. This flag will\n    skip this entirely and provide the full URL.\n"
     echo
     
     # :flag.usage
@@ -122,7 +145,7 @@ baste_usage() {
     
     # :flag.usage
     echo "  --extension, -e EXTENSION"
-    printf "    The file extension of the Gist. If the path used in --file contains a file\n    extension, baste will use that instead.\n"
+    printf "    The file extension of the Gist. If using --file and --extension isn't\n    specified, baste will attempt to infer the extension from the file name.\n"
     printf "    Default: txt\n"
     echo
     
@@ -243,7 +266,7 @@ inf() {
 
 # :src/lib/requires_function.sh
 requires() {
-  command -v "${1}" &> /dev/null || err "baste requires '${1}'"
+  command -v "${1}" &> /dev/null || err "baste requires '${1}'; exiting ..."
 }
 
 # :command.command_functions
@@ -319,6 +342,12 @@ parse_requirements() {
     # :flag.case
     --clipboard | --clip )
       args[--clipboard]=1
+      shift
+      ;;
+  
+    # :flag.case
+    --skip-short-url )
+      args[--skip-short-url]=1
       shift
       ;;
   

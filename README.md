@@ -19,7 +19,67 @@ The command is completely self-contained in a single Bash script. Drop it in you
 $ curl -s https://git.io/JiqBi > /usr/local/bin/baste
 $ chmod a+x /usr/local/bin/baste 
 $ baste --help
+baste - A paste bin tool written in Bash.
 
+Usage:
+  baste [options]
+  baste --help | -h
+  baste --version | -v
+
+Options:
+  --help, -h
+    Show this help
+
+  --version, -v
+    Show version number
+
+  --description, -d DESCRIPTION
+    A brief description of your Gist.
+
+  --name, -n NAME
+    The file name of your Gist.
+    Default: gistfile1
+
+  --content, -c CONTENT
+    The content of your Gist.
+
+  --public, -p
+    Determines whether your Gist will be public or private.
+
+  --clipboard, --clip
+    Attempts to use the latest entry in your local clipboard as content for your
+    Gist. If using MacOS, an attempt to use pbpaste will be made. Otherwise,
+    xclip will be used.
+
+  --skip-short-url
+    Resulting Gist URLs are shortened by default using git.io. This flag will
+    skip this entirely and provide the full URL.
+
+  --file, -f FILE
+    A path to the file to upload to Gist.
+
+  --extension, -e EXTENSION
+    The file extension of the Gist. If using --file and --extension isn't
+    specified, baste will attempt to infer the extension from the file name.
+    Default: txt
+
+  --token, -t TOKEN
+    Explicitly specific a personal developer token as an alternative to using
+    the GITHUB_TOKEN environmental variable.
+
+Environment Variables:
+  GITHUB_TOKEN
+    A personal developer token associated with your Github account. You can
+    easily create a new one in the "Developer Settings" page under your
+    account's settings. The only permission scope you will need is "gist" in
+    order to create new Gists.
+
+Examples:
+  base --file /path/to/file.txt
+  baste --content '... code ...'
+  baste --name 'README.md' --content '# My Readme' --public
+  cat /path/to/file | baste
+  baste --clipboard
 ```
     
 ## Building & Contributing

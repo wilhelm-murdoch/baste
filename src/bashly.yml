@@ -1,0 +1,45 @@
+name: baste
+help: A paste bin tool written in Bash.
+version: 0.1.0
+
+environment_variables:
+  - name: GITHUB_TOKEN
+    help: | 
+      A personal developer token associated with your Github account. You can easily create a new one in the "Developer Settings" page under your account's settings. The only permission scope you will need is "gist" in order to create new Gists.
+
+flags:
+  - long: --description
+    short: -d
+    arg: description
+    help: A brief description of your Gist.
+  - long: --name
+    short: -n
+    arg: name
+    help: The file name of your Gist.
+  - long: --content
+    short: -c
+    arg: content
+    help: The content of your Gist.
+  - long: --public
+    short: -p
+    default: false
+    help: Determines whether your Gist will be public or private.
+  - long: --clipboard
+    short: --clip
+    default: false
+    help: |
+      Attempts to use the latest entry in your local clipboard as content for your Gist. If using MacOS, an attempt to use pbpaste will be made. Otherwise, xsel will be used.
+  - long: --file
+    short: -f
+    arg: file
+    help: A path to the file to upload to Gist.
+  - long: --extension
+    short: -e
+    arg: extension
+    help: The file extension of the Gist. If the path used in --file contains a file extension, baste will use that instead.
+examples:
+  - base --file /path/to/file.txt
+  - baste --content '... code ...'
+  - baste --name 'README.md' --content '# My Readme' --public
+  - cat /path/to/file | baste
+  - baste --clipboard

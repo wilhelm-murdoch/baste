@@ -16,6 +16,7 @@ flags:
     short: -n
     arg: name
     help: The file name of your Gist.
+    default: gistfile1
   - long: --content
     short: -c
     arg: content
@@ -36,7 +37,12 @@ flags:
   - long: --extension
     short: -e
     arg: extension
+    default: txt
     help: The file extension of the Gist. If the path used in --file contains a file extension, baste will use that instead.
+  - long: --token
+    short: -t
+    arg: token
+    help: Explicitly specific a personal developer token as an alternative to using the GITHUB_TOKEN environmental variable.
 examples:
   - base --file /path/to/file.txt
   - baste --content '... code ...'

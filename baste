@@ -5,9 +5,57 @@
 # :command.root_command
 root_command() {
   # :src/root_command.sh
-  echo "# this file is located in 'src/root_command.sh'"
-  echo "# you can edit it freely and regenerate (it will not be overwritten)"
-  inspect_args
+  requires curl
+  requires git
+  requires jq
+  
+  token="${GITHUB_TOKEN}"
+  if [[ ! "${GITHUB_TOKEN}" ]]; then
+    token="${args[token]}"
+  fi
+  
+  if [[ ! "${token}" ]]; then
+    token=$(git config github.token)
+  fi
+  
+  if [[ ! "${token}" ]]; then
+    err 'you must specifiy a valid token by defining a GITHUB_TOKEN env, using the --token flag or setting it in your global git config.'
+  fi
+  
+  CURL_OPTS=
+  # if [[ "${args[--public]}" ]]; then
+  #   CURL_OPTS+='--data-urlencode public=true '
+  # else
+  #   CURL_OPTS+='--data-urlencode public=false '
+  # fi
+  
+  payload=$(
+    jq -n \
+      --arg description "description" \
+      --arg name        "${args[--name]}"   \
+      --arg extension   "${args[--extension]}" \
+      --arg content     "derp"        \
+      --arg public      "true"       \
+      '{
+        description: $description, 
+        public: $public,
+        files: {
+          "\($name).\($extension)": {
+            content: $content
+          }
+        }
+      }'
+  )
+  
+  curl -s -X POST https://api.github.com/gists \
+    -H "Accept: application/vnd.github.v3+json" \
+    -H "Authorization: token ${token}" \
+    ${CURL_OPTS} \
+    -d "${payload}" | jq -r '.html_url'
+  
+  #   LOCATION=$(cat $RESPONSE_FILE|sed -ne '/Location/p'|cut -f2- -d:|tr -d ' ')
+  #   log "* Gist location:"
+  #   echo "$LOCATION"
 }
 
 # :command.version_command
@@ -49,6 +97,7 @@ baste_usage() {
     # :flag.usage
     echo "  --name, -n NAME"
     printf "    The file name of your Gist.\n"
+    printf "    Default: gistfile1\n"
     echo
     
     # :flag.usage
@@ -74,6 +123,12 @@ baste_usage() {
     # :flag.usage
     echo "  --extension, -e EXTENSION"
     printf "    The file extension of the Gist. If the path used in --file contains a file\n    extension, baste will use that instead.\n"
+    printf "    Default: txt\n"
+    echo
+    
+    # :flag.usage
+    echo "  --token, -t TOKEN"
+    printf "    Explicitly specific a personal developer token as an alternative to using\n    the GITHUB_TOKEN environmental variable.\n"
     echo
 
     # :command.usage_environment_variables
@@ -138,6 +193,57 @@ inspect_args() {
       echo "- \${other_args[$i]} = ${other_args[$i]}"
     done
   fi
+}
+
+# :command.user_lib
+# :src/lib/colors.sh
+# ---
+# Color functions
+# This file is a part of Bashly standard library
+#
+# Usage:
+# Use any of the functions below to color or format a portion of a string.
+# 
+#   echo "before $(red this is red) after"
+#   echo "before $(green_bold this is green_bold) after"
+#
+# ---
+
+red() { printf "\e[31m%b\e[0m\n" "$*"; }
+green() { printf "\e[32m%b\e[0m\n" "$*"; }
+yellow() { printf "\e[33m%b\e[0m\n" "$*"; }
+blue() { printf "\e[34m%b\e[0m\n" "$*"; }
+magenta() { printf "\e[35m%b\e[0m\n" "$*"; }
+cyan() { printf "\e[36m%b\e[0m\n" "$*"; }
+bold() { printf "\e[1m%b\e[0m\n" "$*"; }
+underlined() { printf "\e[4m%b\e[0m\n" "$*"; }
+red_bold() { printf "\e[1;31m%b\e[0m\n" "$*"; }
+green_bold() { printf "\e[1;32m%b\e[0m\n" "$*"; }
+yellow_bold() { printf "\e[1;33m%b\e[0m\n" "$*"; }
+blue_bold() { printf "\e[1;34m%b\e[0m\n" "$*"; }
+magenta_bold() { printf "\e[1;35m%b\e[0m\n" "$*"; }
+cyan_bold() { printf "\e[1;36m%b\e[0m\n" "$*"; }
+red_underlined() { printf "\e[4;31m%b\e[0m\n" "$*"; }
+green_underlined() { printf "\e[4;32m%b\e[0m\n" "$*"; }
+yellow_underlined() { printf "\e[4;33m%b\e[0m\n" "$*"; }
+blue_underlined() { printf "\e[4;34m%b\e[0m\n" "$*"; }
+magenta_underlined() { printf "\e[4;35m%b\e[0m\n" "$*"; }
+cyan_underlined() { printf "\e[4;36m%b\e[0m\n" "$*"; }
+
+# :src/lib/err_function.sh
+err() {
+  echo -e "$(red_bold [ERR]) ${1}" >&2
+  exit 1
+}
+
+# :src/lib/inf_function.sh
+inf() {
+  echo -e "$(green [INF]) ${1}" >&2
+}
+
+# :src/lib/requires_function.sh
+requires() {
+  command -v "${1}" &> /dev/null || err "baste requires '${1}'"
 }
 
 # :command.command_functions
@@ -240,6 +346,18 @@ parse_requirements() {
       fi
       ;;
   
+    # :flag.case
+    --token | -t )
+      if [[ $2 ]]; then
+        args[--token]="$2"
+        shift
+        shift
+      else
+        printf "%s\n" "--token requires an argument: --token, -t TOKEN"
+        exit 1
+      fi
+      ;;
+  
   
     -* )
       printf "invalid option: %s\n" "$key"
@@ -256,6 +374,8 @@ parse_requirements() {
   done
   # :command.catch_all_filter
   # :command.default_assignments
+  [[ -n ${args[--name]} ]] || args[--name]="gistfile1"
+  [[ -n ${args[--extension]} ]] || args[--extension]="txt"
   # :command.whitelist_filter
 }
 

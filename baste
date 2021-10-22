@@ -9,9 +9,13 @@ root_command() {
   requires git
   requires jq
   
-  [[ "${OSTYPE}" == "darwin"* ]] && requires pbpaste || requires xclip
+  if [[ "${OSTYPE}" == "darwin"* ]]; then
+    requires pbpaste
+  else
+    requires xclip
+  fi
   
-  : ${GITHUB_TOKEN:=}
+  : "${GITHUB_TOKEN:=}"
   if [[ "${args[--token]}" ]]; then               # First, --token flag takes precedence.
     token="${args[--token]}"
   elif [[ "${GITHUB_TOKEN}" ]]; then              # Next, we try an environmental variable.
@@ -145,7 +149,7 @@ baste_usage() {
     
     # :flag.usage
     echo "  --extension, -e EXTENSION"
-    printf "    The file extension of the Gist. If using --file and --extension isn't\n    specified, baste will attempt to infer the extension from the file name.\n"
+    printf "    The file extension of the Gist.\n"
     printf "    Default: txt\n"
     echo
     
@@ -159,7 +163,7 @@ baste_usage() {
     
     # :environment_variable.usage
     echo "  GITHUB_TOKEN"
-    printf "    A personal developer token associated with your Github account. You can\n    easily create a new one in the \"Developer Settings\" page under your\n    account's settings. The only permission scope you will need is \"gist\" in\n    order to create new Gists.\n"
+    printf "    A personal developer token associated with your Github account. You can\n    easily create a new one in the \"Developer Settings\" section under your\n    account settings page. The only permission scope you will need is \"gist\" in\n    order to create new Gists.\n"
     echo
     # :command.usage_examples
     printf "Examples:\n"

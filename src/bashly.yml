@@ -5,7 +5,7 @@ version: 0.1.0
 environment_variables:
   - name: GITHUB_TOKEN
     help: | 
-      A personal developer token associated with your Github account. You can easily create a new one in the "Developer Settings" page under your account's settings. The only permission scope you will need is "gist" in order to create new Gists.
+      A personal developer token associated with your Github account. You can easily create a new one in the "Developer Settings" section under your account settings page. The only permission scope you will need is "gist" in order to create new Gists.
 
 flags:
   - long: --description
@@ -42,8 +42,7 @@ flags:
     short: -e
     arg: extension
     default: txt
-    help: |
-      The file extension of the Gist. If using --file and --extension isn't specified, baste will attempt to infer the extension from the file name.
+    help: The file extension of the Gist.
   - long: --token
     short: -t
     arg: token

@@ -59,8 +59,7 @@ Options:
     A path to the file to upload to Gist.
 
   --extension, -e EXTENSION
-    The file extension of the Gist. If using --file and --extension isn't
-    specified, baste will attempt to infer the extension from the file name.
+    The file extension of the Gist. 
     Default: txt
 
   --token, -t TOKEN
@@ -71,7 +70,7 @@ Environment Variables:
   GITHUB_TOKEN
     A personal developer token associated with your Github account. You can
     easily create a new one in the "Developer Settings" page under your
-    account's settings. The only permission scope you will need is "gist" in
+    account settings. The only permission scope you will need is "gist" in
     order to create new Gists.
 
 Examples:

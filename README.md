@@ -20,7 +20,7 @@ The command is completely self-contained in a single Bash script. Drop it in you
 $ curl -s https://git.io/JiqBi > /usr/local/bin/baste
 $ chmod a+x /usr/local/bin/baste 
 $ baste --help
-baste - A paste bin tool written in Bash.
+baste - A paste bin tool written in Bash for quickly creating Gists.
 
 Usage:
   baste [options]

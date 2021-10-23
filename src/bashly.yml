@@ -1,5 +1,5 @@
 name: baste
-help: A paste bin tool written in Bash.
+help: A paste bin tool written in Bash for quickly creating Gists.
 version: 0.1.0
 
 environment_variables:

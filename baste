@@ -88,10 +88,10 @@ version_command() {
 # :command.usage
 baste_usage() {
   if [[ -n $long_usage ]]; then
-    printf "baste - A paste bin tool written in Bash.\n"
+    printf "baste - A paste bin tool written in Bash for quickly creating Gists.\n"
     echo 
   else
-    printf "baste - A paste bin tool written in Bash.\n"
+    printf "baste - A paste bin tool written in Bash for quickly creating Gists.\n"
     echo 
   fi
 

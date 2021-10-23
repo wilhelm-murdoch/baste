@@ -1,15 +1,16 @@
 # baste
 
-A paste bin tool written in Bash.
+`baste` is a paste bin tool written in Bash for quickly creating Gists.
 
 ## Requirements
 
 Before you begin using `baste`, you will need the following installed on your machine:
 
-1. `curl`
-2. `git`
-3. `jq`
-4. `xclip` if you're using Linux.
+1. A personal development token which can be sourced [here](https://github.com/settings/tokens).
+2. `curl`
+3. `git`
+4. `jq`
+5. `xclip` if you're using Linux. If you're using MacOS, `baste` will use `pbpaste` which is included by default.
 
 ## Installation
 

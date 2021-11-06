@@ -1,48 +1,48 @@
 name: baste
-help: A paste bin tool written in Bash for quickly creating Gists.
+help: A paste bin tool written in Bash for quickly creating gists.
 version: 0.1.0
 
 environment_variables:
   - name: GITHUB_TOKEN
     help: | 
-      A personal developer token associated with your Github account. You can easily create a new one in the "Developer Settings" section under your account settings page. The only permission scope you will need is "gist" in order to create new Gists.
+      A personal developer token associated with your Github account. You can easily create a new one in the "Developer Settings" section under your account settings page. The only permission scope you will need is "gist" in order to create new gists.
 
 flags:
   - long: --description
     short: -d
     arg: description
-    help: A brief description of your Gist.
+    help: A brief description of your gist.
   - long: --name
     short: -n
     arg: name
-    help: The file name of your Gist.
+    help: The file name of your gist.
     default: gistfile1
   - long: --content
     short: -c
     arg: content
-    help: The content of your Gist.
+    help: The content of your gist.
   - long: --public
     short: -p
     default: false
-    help: Determines whether your Gist will be public or private.
+    help: Determines whether your gist will be public or private.
+  - long: --id
+    arg: id
+    help: Specify the UUID of a previous gist you have ownership of and baste will append content to it.
+    validate: valid_uuid
   - long: --clipboard
     short: --clip
     default: false
     help: |
-      Attempts to use the latest entry in your local clipboard as content for your Gist. If using MacOS, an attempt to use pbpaste will be made. Otherwise, xclip will be used.
-  - long: --skip-short-url
-    default: false
-    help: |
-      Resulting Gist URLs are shortened by default using git.io. This flag will skip this entirely and provide the full URL.
+      Attempts to use the latest entry in your local clipboard as content for your gist. If using MacOS, an attempt to use pbpaste will be made. Otherwise, xclip will be used.
   - long: --file
     short: -f
     arg: file
-    help: A path to the file to upload to Gist.
+    help: A path to the file to upload to gist.
   - long: --extension
     short: -e
     arg: extension
     default: txt
-    help: The file extension of the Gist.
+    help: The file extension of the gist.
   - long: --token
     short: -t
     arg: token

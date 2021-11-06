@@ -56,18 +56,18 @@ payload=$(
 )
 
 response=$(
-  curl -s -X POST https://api.github.com/gists \
+  curl -sw "%{http_code}" https://api.github.com/gists \
   -H "Accept: application/vnd.github.v3+json" \
   -H "Authorization: token ${token}" \
-  -d "${payload}"
+  -d "${payload}" \
 )
 
-url=$(echo "${response}" | jq -r '.html_url')
-[[ "${url}" == 'null' ]] && err "$(echo "${response}" | jq -r '.message' | tr -d '\n\t')"
+code="${response##*$'\n'}"
+body="${response%$'\n'*}"
 
-if [[ "${args[--skip-short-url]}" ]]; then
-  echo "${url}"
-  exit 0
+if [[ "${code}" != "201" ]]; then
+  message=$(echo "${body}" | jq -r '.message')
+  err "error from gist.github.com: ${message}; exiting ..."
 fi
 
-curl -is https://git.io -F "url=${url}" | awk -v FS=": " '/^Location/{print $2}'
+echo "${body}" | jq -r '.html_url'
